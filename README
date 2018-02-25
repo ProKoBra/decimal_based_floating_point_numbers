@@ -1,4 +1,4 @@
-The file modIntToFP.hpp includes three classes. One of these is important it's the class "modFP_64".
+The file modIntToFP.hpp includes four classes. One of these is important it's the class "modFP_64".
 The constructor takes one parameter which is a string this is the value which you want to put into the variable,
 you can insert a point into this string and then the variable will represent a number with a point.
 This Datatype includes every normal floating point operation but it doesn't implements operations like logarithms or roots etc.
