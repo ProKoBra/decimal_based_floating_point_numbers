@@ -4,3 +4,5 @@ you can insert a point into this string and then the variable will represent a n
 This Datatype includes every normal floating point operation but it doesn't implements operations like logarithms or roots etc.
 In my concept precision is going before useability with this reasons I've implemented errors 
 which will say you that something went wrong like a number which doesn't fit in the 64bit or something else.
+
+If you can find any wrong results, then please tell it to me and I will fix it.
