@@ -1,3 +1,6 @@
+#ifndef stringNumber_HPP
+#define stringNumber_HPP
+
 #include <iostream>
 #include <string.h>
 
@@ -222,4 +225,41 @@ class stringNumber
       {
         return this->value[index];
       }
+      inline static std::string decStringtoBinString(std::string decString)
+      {
+        //DEBUG std::cout << "decString = " + decString + "\n";
+        std::string ret;
+        stringNumber decstringNumber(decString);
+        std::string tempRet;
+        std::string zerovalue;
+        //DEBUG std::cout << decstringNumber.value << " hallo\n"; //DEBUG
+        for(int i = 0; i < decString.length(); i++)
+        {
+          zerovalue += "0";
+        }
+        stringNumber zero(zerovalue);
+        int counter = 0;
+        bool overflow;
+        while(decstringNumber.value != zero.value)
+        {
+          //DEBUG std::cout << "while!\n"; //DEBUG
+          decstringNumber = decstringNumber.div2(&overflow);
+          tempRet += "e";
+          tempRet[counter] = overflow+'0';
+          counter++;
+        }
+        //DEBUG std::cout << "tempRet = " << tempRet << "\n"; // DEBUG
+        int i1 = 0;
+        int i2 = tempRet.length()-1;
+        while(i1 < tempRet.length())
+        {
+          ret+="0";
+          //DEBUG std::cout << "ret = " << ret << "\n";
+          ret[i1] = tempRet[i2];
+          i1++;
+          i2--;
+        }
+        return ret;
+      }
 };
+#endif

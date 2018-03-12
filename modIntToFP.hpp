@@ -1,3 +1,6 @@
+#ifndef modIntToFP_HPP
+#define modIntToFP_HPP
+
 #include <iostream>
 #include <string.h>
 #include <vector>
@@ -667,3 +670,5 @@ modFP_64 modFP_64::operator / (modFP_64 operand)
     return ret;
   }
 }
+
+#endif
