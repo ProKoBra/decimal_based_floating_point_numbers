@@ -276,6 +276,33 @@ public:
     }
     return ret;
   }
+  inline dataMul2<data> operator % (dataMul2<data> operand)
+  {
+    if(operand.firstSignificantIndex() == operand.getSize())
+    {
+      std::cerr << "error in memeberfunction dataMul2<data>::operator/ : cannot divide by zero\n";
+      return *this;
+    }
+    dataMul2<data> one("1");
+    dataMul2<data> copyOfThis = *this;
+    //DEBUG std::cout << "no error 0\n";
+    while(true)
+    {
+      //DEBUG std::cout << "copyOfThis = " << copyOfThis.getStringValue() << " operand = " << operand.getStringValue() << " copyOfThis < operand = " << (copyOfThis < operand) << "\n";
+      if(copyOfThis < operand)
+      {
+        //DEBUG std::cout << "if\n";
+        break;
+      }
+      else
+      {
+        //DEBUG std::cout << "no error 1 " << copyOfThis.getStringValue() << "\n";
+        copyOfThis = copyOfThis - operand;
+        //DEBUG std::cout << "no error 2 " << copyOfThis.getStringValue() << "\n";
+      }
+    }
+    return copyOfThis;
+  }
   data higherValue;
   data lowerValue;
 };
