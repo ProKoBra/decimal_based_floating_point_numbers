@@ -303,6 +303,18 @@ public:
     }
     return copyOfThis;
   }
+  inline dataMul2<data> pow(dataMul2<data> operand)
+  {
+    dataMul2<data> ret("1");
+    dataMul2<data> one = ret;
+    dataMul2<data> zero = one - one;
+    while (operand > zero)
+    {
+      ret = ret * (*this);
+      operand = operand - one;
+    }
+    return ret;
+  }
   data higherValue;
   data lowerValue;
 };
