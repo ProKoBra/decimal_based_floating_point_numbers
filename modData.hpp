@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string.h>
 #include "stringNumber.hpp"
+#include "definitions.hpp"
 
 template <typename data> //data has to be an atomic, unsigned and numeric datatype(char, short, int, long long) and no class
 class modData
@@ -117,6 +118,17 @@ class modData
     {
       return 8 * (sizeof(data));
     }
+    inline unsigned long long firstSignificantIndex()
+    {
+      for(unsigned long long i = 0; i < 8 * (sizeof(data)); i++)
+      {
+        if((*this)[i])
+        {
+          return i;
+        }
+      }
+      return this->getSize();
+    }
     inline void operator =(modData<data> operand)
     {
       this->value = operand.value;
@@ -129,15 +141,34 @@ class modData
     {
       modData<data> ret;
       ret.value = this->value + operand.value;
+      if (ret.value < this->value || ret.value < operand.value) {
+        error = true;
+      } else {
+        error = false;
+      }
       return ret;
     }
     inline modData<data> operator -(modData<data> operand)
     {
-      return modData<data>(this->value - operand.value);
+      modData<data> ret;
+      ret.value = this->value - operand.value;
+      if (ret.value > this->value) {
+        error = true;
+      } else {
+        error = false;
+      }
+      return ret;
     }
     inline modData<data> operator *(modData<data> operand)
     {
-      return modData<data>(this->value * operand.value);
+      modData<data> ret;
+      ret.value = this->value * operand.value;
+      if (ret.value < this->value || ret.value < operand.value) {
+        error = true;
+      } else {
+        error = false;
+      }
+      return ret;
     }
     inline modData<data> operator %(modData<data> operand)
     {

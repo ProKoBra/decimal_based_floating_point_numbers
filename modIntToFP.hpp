@@ -5,8 +5,7 @@
 #include <string.h>
 #include <vector>
 #include "stringNumber.hpp"
-
-bool periodDetection;
+#include "periodDetection.hpp"
 
 class modLong
 {
@@ -556,6 +555,7 @@ class modFP_64
     unsigned char pointPosition;
 };
 
+/*periodDetection
 class periodDivisionElement
 {
   public:
@@ -611,13 +611,13 @@ class periodDivisionVector
     }
     std::vector<periodDivisionElement> value;
 };
-
+*/
 modFP_64 modFP_64::operator / (modFP_64 operand)
 {
   if(periodDetection)
   {
-    periodDivisionVector periodDetector;
-    periodDivisionElement mem;
+    periodDivisionVector<modFP_64> periodDetector;
+    periodDivisionElement<modFP_64> mem;
     modFP_64 ret = this->divisionWithoutPoint(operand);
     modFP_64 moduloResult = (*this) % operand;
     modFP_64 zero("0");

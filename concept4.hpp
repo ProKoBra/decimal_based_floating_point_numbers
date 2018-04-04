@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string.h>
 #include "stringNumber.hpp"
+#include "definitions.hpp"
 
 template <typename data>
 class dataMul2
@@ -192,6 +193,14 @@ public:
   {
     return this->higherValue == operand.higherValue ? this->lowerValue < operand.lowerValue : this->higherValue < operand.higherValue;
   }
+  inline bool operator <= (dataMul2<data> operand)
+  {
+    return *this < operand || *this == operand;
+  }
+  inline bool operator >= (dataMul2<data> operand)
+  {
+    return *this > operand || *this == operand;
+  }
   inline dataMul2<data> operator + (dataMul2<data> operand)
   {
     dataMul2<data> ret("0");
@@ -200,33 +209,45 @@ public:
     //DEBUG std::cout << this->lowerValue.getStringValue() << '\n';
     //DEBUG std::cout << operand.lowerValue.getStringValue() << '\n';
     //DEBUG std::cout << ret.lowerValue.getStringValue() << '\n';
-    if(ret.lowerValue < this->lowerValue)
+    if(error)
     {
       //DEBUG std::cout << "if\n";
       carry = data("1");
+      error = false;
     }
     ret.higherValue = this->higherValue + operand.higherValue;
+    bool localError = error;
     ret.higherValue = ret.higherValue + carry;
+    error = localError || error;
     return ret;
   }
   inline dataMul2<data> operator * (dataMul2<data> operand)
   {
     dataMul2<data> ret("0");
     dataMul2<data> zero("0");
-    zero = ret;
     dataMul2<data> one("1");
+    bool localError;
     if(operand == zero || (*this) == zero)
     {
       return ret;
     }
+    //DEBUG std::cout << "ret = " << ret.getStringValue() << " this = " << this->getStringValue() << " operand = " << operand.getStringValue() << " one = " << one.getStringValue() << "\n";
     while(operand !=zero)
     {
+      //DEBUG std::cout << "ret = " << ret.getStringValue() << " this = " << this->getStringValue() << " operand = " << operand.getStringValue() << " one = " << one.getStringValue() << "\n";
       operand = operand - one;
+      //DEBUG std::cout << "ret = " << ret.getStringValue() << " this = " << this->getStringValue() << " operand = " << operand.getStringValue() << " one = " << one.getStringValue() << "\n";
       ret = ret + (*this);
+      //DEBUG std::cout << "ret = " << ret.getStringValue() << " this = " << this->getStringValue() << " operand = " << operand.getStringValue() << " one = " << one.getStringValue() << "\n";
+      if(error)
+      {
+        localError = true;
+      }
     }
+    error = localError;
     return ret;
   }
-  inline dataMul2<data> operator - (dataMul2<data> operand)
+  /*old subtraction inline dataMul2<data> operator - (dataMul2<data> operand)
   {
     if(operand.firstSignificantIndex() == operand.getSize())
     {
@@ -236,28 +257,56 @@ public:
     //DEBUG std::cout << "no error 3\n";
     dataMul2<data> subtrahend = operand.twoscomplement();
     //DEBUG std::cout << "no error 4\n";
+    dataMul2<data> ret;
+    std::cout << " ret = " << ret.getStringValue() << " this = " << this->getStringValue() << " operand = " << operand.getStringValue() << " subtrahend = " << subtrahend.getStringValue() << "\n";
     originalFirstSignificantIndex = subtrahend.firstSignificantIndex() > originalFirstSignificantIndex ? subtrahend.firstSignificantIndex() : originalFirstSignificantIndex;
     //DEBUG std::cout << "no error 5\n";
-    dataMul2<data> ret = *this + subtrahend;
+    ret = *this + subtrahend;
+    std::cout << " ret = " << ret.getStringValue() << " this = " << this->getStringValue() << " operand = " << operand.getStringValue() << " subtrahend = " << subtrahend.getStringValue() << "\n";
+    error = false;
+    //DEBUG std::cout << "add\n";
+    //DEBUG std::cout << "ret = " << ret.getStringValue() << " error = " << error << "\n";
     //DEBUG std::cout << "no error 6 " << originalFirstSignificantIndex << "\n";
-    if(originalFirstSignificantIndex != 0)
+    if(originalFirstSignificantIndex != 0 && ret.firstSignificantIndex() > originalFirstSignificantIndex && ret.firstSignificantIndex() != ret.getSize())
     {
-      ret.setValueOnIndex(originalFirstSignificantIndex - 1, 0);
+      ret.setValueOnIndex(ret.firstSignificantIndex(), 0);
     }
+    if(ret > *this) {error = true;}
+    //DEBUG std::cout << "ret = " << ret.getStringValue() << " error = " << error << "\n";
     //DEBUG std::cout << "no error 7\n";
+    return ret;
+  }*/
+  inline dataMul2<data> operator - (dataMul2<data> operand)
+  {
+    bool localError;
+    if(operand.firstSignificantIndex() == operand.getSize())
+    {
+      return *this;
+    }
+    dataMul2<data> ret;
+    ret.lowerValue = this->lowerValue - operand.lowerValue;
+    if(error)
+    {
+      error = false;
+      operand.higherValue = operand.higherValue + data("1");
+      localError = error;
+    }
+    ret.higherValue = this->higherValue - operand.higherValue;
+    error = error || localError;
     return ret;
   }
   inline dataMul2<data> operator / (dataMul2<data> operand)
   {
     if(operand.firstSignificantIndex() == operand.getSize())
     {
-      //DEBUG std::cerr << "error in memeberfunction dataMul2<data>::operator/ : cannot divide by zero\n";
+      std::cerr << "error in memeberfunction dataMul2<data>::operator/ : cannot divide by zero\n";
       return *this;
     }
     dataMul2<data> ret;
     dataMul2<data> one("1");
     dataMul2<data> copyOfThis = *this;
     //DEBUG std::cout << "no error 0\n";
+    bool localError;
     while(true)
     {
       //DEBUG std::cout << "copyOfThis = " << copyOfThis.getStringValue() << " operand = " << operand.getStringValue() << " copyOfThis < operand = " << (copyOfThis < operand) << "\n";
@@ -270,22 +319,26 @@ public:
       {
         //DEBUG std::cout << "no error 1 " << copyOfThis.getStringValue() << "\n";
         copyOfThis = copyOfThis - operand;
+        if(error){localError=true;}
         //DEBUG std::cout << "no error 2 " << copyOfThis.getStringValue() << "\n";
         ret = ret + one;
+        if(error){localError=true;}
       }
     }
+    error = localError || error;
     return ret;
   }
   inline dataMul2<data> operator % (dataMul2<data> operand)
   {
     if(operand.firstSignificantIndex() == operand.getSize())
     {
-      std::cerr << "error in memeberfunction dataMul2<data>::operator/ : cannot divide by zero\n";
+      std::cerr << "error in memeberfunction dataMul2<data>::operator% : cannot divide by zero\n";
       return *this;
     }
     dataMul2<data> one("1");
     dataMul2<data> copyOfThis = *this;
     //DEBUG std::cout << "no error 0\n";
+    bool localError;
     while(true)
     {
       //DEBUG std::cout << "copyOfThis = " << copyOfThis.getStringValue() << " operand = " << operand.getStringValue() << " copyOfThis < operand = " << (copyOfThis < operand) << "\n";
@@ -298,9 +351,11 @@ public:
       {
         //DEBUG std::cout << "no error 1 " << copyOfThis.getStringValue() << "\n";
         copyOfThis = copyOfThis - operand;
+        if(error){localError=true;}
         //DEBUG std::cout << "no error 2 " << copyOfThis.getStringValue() << "\n";
       }
     }
+    error = localError;
     return copyOfThis;
   }
   inline dataMul2<data> pow(dataMul2<data> operand)
@@ -308,12 +363,24 @@ public:
     dataMul2<data> ret("1");
     dataMul2<data> one = ret;
     dataMul2<data> zero = one - one;
+    bool localError;
     while (operand > zero)
     {
       ret = ret * (*this);
+      if(error&&!localError){localError=true;}
       operand = operand - one;
+      if(error&&!localError){localError=true;}
     }
+    error = localError || error;
     return ret;
+  }
+  inline void operator += (dataMul2<data> operand)
+  {
+    *this = *this + operand;
+  }
+  inline void operator *= (dataMul2<data> operand)
+  {
+    *this = *this * operand;
   }
   data higherValue;
   data lowerValue;
