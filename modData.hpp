@@ -114,7 +114,7 @@ class modData
         }
       }
     }
-    inline unsigned int getSize()
+    inline unsigned long long getSize()
     {
       return 8 * (sizeof(data));
     }

@@ -170,7 +170,9 @@ public:
   }
   inline dataMul2<data> twoscomplement()
   {
-    return (~(*this)) + dataMul2<data>("1");
+    dataMul2<data> ret = (~(*this)) + dataMul2<data>("1");
+    error = false;
+    return ret;
   }
   inline void operator = (dataMul2<data> equal)
   {
@@ -319,7 +321,7 @@ public:
       {
         //DEBUG std::cout << "no error 1 " << copyOfThis.getStringValue() << "\n";
         copyOfThis = copyOfThis - operand;
-        if(error){localError=true;}
+        //should be obsolete: if(error){localError=true;}
         //DEBUG std::cout << "no error 2 " << copyOfThis.getStringValue() << "\n";
         ret = ret + one;
         if(error){localError=true;}
@@ -351,7 +353,7 @@ public:
       {
         //DEBUG std::cout << "no error 1 " << copyOfThis.getStringValue() << "\n";
         copyOfThis = copyOfThis - operand;
-        if(error){localError=true;}
+        //should be obsolete: if(error){localError=true;}
         //DEBUG std::cout << "no error 2 " << copyOfThis.getStringValue() << "\n";
       }
     }
@@ -369,7 +371,7 @@ public:
       ret = ret * (*this);
       if(error&&!localError){localError=true;}
       operand = operand - one;
-      if(error&&!localError){localError=true;}
+      //should be obsolete: if(error&&!localError){localError=true;}
     }
     error = localError || error;
     return ret;
