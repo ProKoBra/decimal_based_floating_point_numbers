@@ -171,7 +171,9 @@ public:
     while (exp > 0) {
       //DEBUG std::cout << "              exp = " << exp << "\n";
       //DEBUG std::cout << "no error0\n";
+      //DEBUG std::cout << "before mul\n";
       ret = ret * ten;
+      //DEBUG std::cout << "after mul\n";
       //DEBUG std::cout << "no error1\n";
       exp--;
     }
@@ -276,7 +278,7 @@ public:
   }
   inline infinitFP<data> divisionWithoutPoint(infinitFP<data> operand)
   {
-    bool localError;
+    //DEBUG std::cout << "begin of ifs\n";
     if(operand == (*this))
     {
       return infinitFP<data>("1");
@@ -288,11 +290,13 @@ public:
     else if(operand.value.firstSignificantIndex() == operand.value.getSize())
     {
       std::cerr << "error in memberfunction infinitFP::divisionWithoutPoint : you can't divide with zero\n";
+      throw std::exception();
     }
     else if(operand.value == data("1") && operand.pointPosition == 0)
     {
       return *this;
     }
+    //DEBUG std::cout << "begin of dwp\n";
     unsigned char uniquePointPosition = this->pointPosition > operand.pointPosition ? this->pointPosition : operand.pointPosition;
     infinitFP<data> convertThis = this->pointConvert(uniquePointPosition);
     infinitFP<data> convertOperand = operand.pointConvert(uniquePointPosition);
@@ -300,20 +304,28 @@ public:
     infinitFP<data> one("1");
     //DEBUG std::cout << "before sub\n";
     //DEBUG std::cout << "convertThis = " << convertThis.getStringValue() << " convertOperand = " << convertOperand.getStringValue() << "\n";
-    convertThis = convertThis - convertOperand;
+    convertThis.value = convertThis.value - convertOperand.value;
     //DEBUG std::cout << "after sub\n";
-    bool whileError;
-    while(!error)
+    bool whileError = error;
+    bool localError;
+    while(!whileError)
     {
       convertThis.value = convertThis.value - convertOperand.value;
       whileError = error;
       //DEBUG std::cout << "while" << error << whileError << "\n";
       ret = ret + one;
-      error = whileError;
+      localError = error;
     }
+    if(localError)
+    {
+      std::cerr << "error in memberfunction infinitFP::divisionWithoutPoint : result is too high\n";
+      throw std::exception();
+    }
+    error = false;
+    //DEBUG std::cout << "end of dwp\n";
     return ret;
   }
-  inline infinitFP<data> operator % (infinitFP<data> operand)
+  /*inline infinitFP<data> operator % (infinitFP<data> operand)
   {
     //DEBUG std::cout << "before div\n";
     infinitFP<data> ret = this->divisionWithoutPoint(operand);
@@ -325,6 +337,39 @@ public:
     //DEBUG std::cout << "ret = " << ret.getStringValue() << " operand = " << operand.getStringValue() << "\n";
     return ret;
     //return (*this) - ((this->divisionWithoutPoint(operand))*operand);
+  }*/
+  inline infinitFP<data> operator % (infinitFP<data> operand)
+  {
+    if(operand == (*this) || this->value.firstSignificantIndex() == this->value.getSize() || (operand.value == data("1") && operand.pointPosition == 0))
+    {
+      return infinitFP<data>("0");
+    }
+    else if(operand.value.firstSignificantIndex() == operand.value.getSize())
+    {
+      std::cerr << "error in memberfunction infinitFP::divisionWithoutPoint : you can't divide with zero\n";
+      throw std::exception();
+    }
+    unsigned char uniquePointPosition = this->pointPosition > operand.pointPosition ? this->pointPosition : operand.pointPosition;
+    infinitFP<data> convertThis = this->pointConvert(uniquePointPosition);
+    infinitFP<data> convertOperand = operand.pointConvert(uniquePointPosition);
+    infinitFP<data> one("1");
+    infinitFP<data> oldConvertThis("0");
+    //DEBUG std::cout << "before sub\n";
+    //DEBUG std::cout << "convertThis = " << convertThis.getStringValue() << " convertOperand = " << convertOperand.getStringValue() << "\n";
+    oldConvertThis = convertThis;
+    convertThis.value = convertThis.value - convertOperand.value;
+    //DEBUG std::cout << "after sub\n";
+    bool whileError = error;
+    while(!whileError)
+    {
+      oldConvertThis = convertThis;
+      convertThis.value = convertThis.value - convertOperand.value;
+      whileError = error;
+      //DEBUG std::cout << "while" << error << whileError << "\n";
+    }
+    convertThis = oldConvertThis;
+    error = false;
+    return convertThis;
   }
   inline infinitFP<data> pow(infinitFP<data> operand)
   {
@@ -336,6 +381,7 @@ public:
       ret = ret * (*this);
       operand = operand - one;
     }
+    error = false;
     return ret;
   }
   inline infinitFP<data> factorial()
@@ -350,6 +396,7 @@ public:
     {
       return one;
     }
+    error = false;
     return *this * ((*this - one).factorial());
   }
   inline bool operator > (infinitFP<data> operand)
@@ -361,10 +408,13 @@ public:
   }
   inline bool operator < (infinitFP<data> operand)
   {
+    //DEBUG std::cout << "begin of cmp\n";
     unsigned short uniquePointPosition = this->pointPosition > operand.pointPosition ? this->pointPosition : operand.pointPosition;
     infinitFP<data> convertThis = this->pointConvert(uniquePointPosition);
     infinitFP<data> convertOperand = operand.pointConvert(uniquePointPosition);
-    return convertThis.value < convertOperand.value;
+    bool ret = convertThis.value < convertOperand.value;
+    //DEBUG std::cout << "end of cmp\n";
+    return ret;
   }
   inline bool operator == (infinitFP<data> operand)
   {
@@ -400,8 +450,12 @@ public:
     {
       periodDivisionVector<infinitFP<data> > periodDetector;
       periodDivisionElement<infinitFP<data> > mem;
+      //DEBUG std::cout << "before dwp\n";
       infinitFP<data> ret = this->divisionWithoutPoint(operand);
+      //error = false;
       infinitFP<data> moduloResult = (*this) % operand;
+      //DEBUG std::cout << "moduloResult = " << moduloResult.getStringValue() << "\n";
+      //error = false;
       infinitFP<data> zero("0");
       infinitFP<data> ten("10");
       infinitFP<data> divisionMem;
@@ -411,11 +465,14 @@ public:
       {
         //DEBUG std::cout << "no error0\n";
         divisionMem = moduloResult * ten;
+        //error = false;
         //DEBUG std::cout << "no error1\n";
         moduloResult = divisionMem % operand;
+        //error = false;
         //DEBUG std::cout << "no error2\n";
         mem.remainder = moduloResult;
         divisionMem = divisionMem.divisionWithoutPoint(operand);
+        //error = false;
         mem.result = divisionMem;
         //DEBUG std::cout << "no error3\n";
         if(periodDetector.is_in(mem))
@@ -428,15 +485,19 @@ public:
         divisionMem = divisionMem.pointLeftShift(tenExponent);
         //DEBUG std::cout << "div1ret = " << ret.getStringValue() << " divisionMem = " << divisionMem.getStringValue() << "\n";
         ret = ret + divisionMem;
+        //error = false;
         //DEBUG std::cout << "div2ret = " << ret.getStringValue() << " divisionMem = " << divisionMem.getStringValue() << "\n";
         tenExponent++;
       }
+      error = false;
       return ret;
     }
     else
     {
       infinitFP<data> ret = this->divisionWithoutPoint(operand);
+      //error = false;
       infinitFP<data> moduloResult = (*this) % operand;
+      //error = false;
       infinitFP<data> zero("0");
       infinitFP<data> ten("10");
       infinitFP<data> divisionMem;
@@ -445,14 +506,19 @@ public:
       while(moduloResult != zero)
       {
         divisionMem = moduloResult * ten;
+        //error = false;
         moduloResult = divisionMem % operand;
+        //error = false;
         divisionMem = divisionMem.divisionWithoutPoint(operand);
+        //error = false;
         divisionMem = divisionMem.pointLeftShift(tenExponent);
         ret = ret + divisionMem;
+        //error = false;
         //DEBUG std::cout << "no error " << (int)tenExponent << "\n";
         //DEBUG std::cout << ret.getStringValue() << "\n";
         tenExponent++;
       }
+      error = false;
       return ret;
     }
   }
