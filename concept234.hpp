@@ -477,7 +477,7 @@ public:
         //DEBUG std::cout << "no error3\n";
         if(periodDetector.is_in(mem))
         {
-          std::cerr << "error in memberfunction infinitFP::operator/ : the program has detected a period which is produced by an operation the current return value which won't be returned is: " << ret.getStringValue() << " and the period is: " << periodDetector.getAllResults(mem) << "\n";
+          std::cerr << "error in memberfunction infinitFP::operator/ : the program has detected a recurring decimal which is produced by an operation the current return value which won't be returned is: " << ret.getStringValue() << " and the period is: " << periodDetector.getAllResults(mem) << "\n";
           break;
         }
         periodDetector.append(mem);
